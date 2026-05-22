@@ -10,28 +10,29 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          50: "#fffbeb",
-          100: "#fef3c7",
-          200: "#fde68a",
-          300: "#fcd34d",
-          400: "#fbbf24",
-          500: "#f59e0b",
-          600: "#d97706",
-          700: "#b45309",
-          800: "#92400e",
-          900: "#78350f",
-          950: "#451a03",
+          50: "#fcfbf9",
+          100: "#f1ede2",
+          200: "#e3dbc5",
+          300: "#d5c9a8",
+          400: "#c7b78b",
+          500: "#1a5f3a", // Forest Green
+          600: "#154d2f",
+          700: "#103b24",
+          800: "#0b2919",
+          900: "#06170e",
+          950: "#030b07",
         },
         honey: {
           light: "#FFF8E1",
-          gold: "#FFC107",
-          dark: "#FFA000",
-          rich: "#E65100",
+          gold: "#e2951b", // Honey Amber
+          dark: "#b37613",
+          rich: "#8a580a",
         },
-        organic: {
-          light: "#E8F5E9",
-          green: "#2E7D32",
-          dark: "#1B5E20",
+        brand: {
+          green: "#1a5f3a",
+          amber: "#e2951b",
+          beige: "#fcfbf9",
+          rust: "#a63a1e",
         }
       },
       backgroundImage: {

@@ -64,60 +64,59 @@ const FeaturedProducts = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8">
           {PRODUCTS.map((product) => (
-            <div key={product.id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col h-full border border-neutral-100">
-              <div className="relative h-64 overflow-hidden">
+            <div key={product.id} className="group flex flex-col h-full bg-white border border-neutral-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500">
+              <div className="relative aspect-[3/4] overflow-hidden">
                 <img 
                   src={product.image} 
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute top-4 right-4 flex flex-col gap-2">
-                  <button className="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-primary-500 hover:text-white transition-colors">
-                    <Heart size={18} />
-                  </button>
-                </div>
+                {/* Secondary image hover effect mockup */}
+                <div className="absolute inset-0 bg-neutral-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
                 {product.discountPrice && (
-                  <div className="absolute top-4 left-4 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-                    SALE
+                  <div className="absolute top-4 right-4 bg-brand-rust text-white px-3 py-1 text-[10px] font-black uppercase tracking-tighter rounded-sm">
+                    UP To -{Math.round((1 - product.discountPrice / product.price) * 100)}%
                   </div>
                 )}
               </div>
               
-              <div className="p-6 flex flex-col flex-grow">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">{product.category}</span>
-                  <div className="flex items-center text-amber-400">
-                    <Star size={14} fill="currentColor" />
-                    <span className="ml-1 text-sm font-bold text-neutral-900">{product.rating}</span>
-                  </div>
+              <div className="p-6 flex flex-col flex-grow text-center">
+                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] mb-2 font-inter">Love of Honey</p>
+                <h3 className="text-sm font-bold text-neutral-900 mb-2 leading-snug group-hover:text-brand-green transition-colors px-4 min-h-[3rem] flex items-center justify-center">
+                  <Link href={`/products/${product.id}`}>{product.name}</Link>
+                </h3>
+                
+                <div className="flex items-center justify-center space-x-1 text-brand-amber mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={14} fill="currentColor" />
+                  ))}
+                  <span className="text-[11px] text-neutral-400 font-bold ml-1">({product.reviews})</span>
                 </div>
                 
-                <h3 className="text-lg font-bold text-neutral-900 mb-1 group-hover:text-primary-600 transition-colors">
-                  <Link href={`/product/${product.id}`}>{product.name}</Link>
-                </h3>
-                <p className="text-sm text-neutral-500 mb-4">{product.weight}</p>
-                
-                <div className="mt-auto flex justify-between items-center">
-                  <div>
-                    {product.discountPrice ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-neutral-900">${product.discountPrice}</span>
-                        <span className="text-sm text-neutral-400 line-through">${product.price}</span>
-                      </div>
-                    ) : (
-                      <span className="text-xl font-bold text-neutral-900">${product.price}</span>
-                    )}
-                  </div>
-                  <button className="p-3 bg-neutral-900 text-white rounded-2xl hover:bg-primary-600 transition-all hover:shadow-lg active:scale-90">
-                    <ShoppingCart size={20} />
+                <div className="mb-6">
+                  {product.discountPrice ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-sm text-neutral-400 line-through font-medium">₹ {Math.round(product.price * 80)}</span>
+                      <span className="text-lg font-black text-brand-rust tracking-tight">₹ {Math.round(product.discountPrice * 80)}</span>
+                    </div>
+                  ) : (
+                    <span className="text-lg font-black text-neutral-900">₹ {Math.round(product.price * 80)}</span>
+                  )}
+                </div>
+
+                <div className="mt-auto">
+                  <button className="w-full py-3 border-2 border-brand-green text-brand-green rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-green hover:text-white transition-all shadow-sm active:scale-95">
+                    Add to Cart
                   </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );

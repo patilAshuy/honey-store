@@ -18,16 +18,16 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #ffffff;
+  background: #fcfbf9;
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-primary-700 transition-all duration-300 shadow-md hover:shadow-lg active:scale-95;
+    @apply bg-brand-green text-white px-8 py-4 rounded-full font-bold hover:bg-[#154d2f] transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95 uppercase tracking-wider text-sm;
   }
   
   .glass-card {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl;
+    @apply bg-white border border-neutral-100 shadow-sm rounded-3xl;
   }
   
   .honey-gradient {
