@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ShoppingCart, Menu, X, User, Search } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -14,6 +15,9 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const { cart } = useCart();
+  const cartCount = cart.reduce((acc: number, item: any) => acc + item.quantity, 0);
 
   return (
     <>
@@ -49,7 +53,9 @@ const Navbar = () => {
               </Link>
               <Link href="/cart" className="relative text-[#1a5f3a] hover:opacity-70">
                 <ShoppingCart size={22} />
-                <span className="absolute -top-2 -right-2 bg-brand-rust text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+                <span className="absolute -top-2 -right-2 bg-brand-rust text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  {cartCount}
+                </span>
               </Link>
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-[#1a5f3a]">
                 {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}

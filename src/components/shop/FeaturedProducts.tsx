@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { Star, ShoppingCart, Heart } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
 
 const PRODUCTS = [
   {
@@ -51,15 +52,28 @@ const PRODUCTS = [
 ];
 
 const FeaturedProducts = () => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (product: any) => {
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.discountPrice || product.price,
+      quantity: 1,
+      image: product.image
+    });
+    alert(`${product.name} added to cart!`);
+  };
+
   return (
-    <section className="py-24 bg-neutral-50">
+    <section className="py-24 bg-neutral-50 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-12">
           <div className="space-y-4">
             <h2 className="text-4xl font-bold font-outfit">Our Best Sellers</h2>
             <p className="text-neutral-500">Discover our most loved honey varieties, harvested with care.</p>
           </div>
-          <Link href="/products" className="hidden sm:flex items-center space-x-2 text-primary-600 font-bold border-b-2 border-primary-600 pb-1">
+          <Link href="/products" className="hidden sm:flex items-center space-x-2 text-brand-green font-bold border-b-2 border-brand-green pb-1">
             <span>View All</span>
           </Link>
         </div>
@@ -108,7 +122,10 @@ const FeaturedProducts = () => {
                 </div>
 
                 <div className="mt-auto">
-                  <button className="w-full py-3 border-2 border-brand-green text-brand-green rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-green hover:text-white transition-all shadow-sm active:scale-95">
+                  <button 
+                    onClick={() => handleAddToCart(product)}
+                    className="w-full py-3 border-2 border-brand-green text-brand-green rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-green hover:text-white transition-all shadow-sm active:scale-95"
+                  >
                     Add to Cart
                   </button>
                 </div>

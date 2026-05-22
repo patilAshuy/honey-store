@@ -1,81 +1,198 @@
 "use client";
-import React, { useState } from "react";
-import Script from "next/script";
+import React, { useState, useEffect } from "react";
+import { useCart } from "@/hooks/useCart";
+import { ShieldCheck, Lock, CreditCard } from "lucide-react";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function CheckoutPage() {
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { cart, cartTotal, clearCart } = useCart();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    pincode: ""
+  });
 
-  const handlePayment = async () => {
-    setIsProcessing(true);
-    // 1. Create order on server (Next.js API route)
-    // 2. Open Razorpay Checkout modal
-    // 3. Verify payment on server
-    
-    // Placeholder implementation
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: 2499,
-      currency: "INR",
-      name: "HoneyPremium",
-      description: "Organic Wildflower Honey",
-      order_id: "order_mock_123",
-      handler: function (response: any) {
-        alert("Payment Successful! ID: " + response.razorpay_payment_id);
-        window.location.href = "/order-success";
-      },
-      prefill: {
-        name: "John Doe",
-        email: "john@example.com",
-        contact: "9999999999",
-      },
-      theme: { color: "#d97706" },
-    };
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
-    const rzp1 = new (window as any).Razorpay(options);
-    rzp1.open();
-    setIsProcessing(false);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // 1. Create order on server
+      const response = await fetch("/api/razorpay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: Math.round(cartTotal * 80) })
+      });
+
+      const order = await response.json();
+
+      // 2. Initialize Razorpay
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SsNBb7JqEqjZke",
+        amount: order.amount,
+        currency: "INR",
+        name: "HoneyPremium",
+        description: "Order Payment",
+        order_id: order.id,
+        handler: function (response: any) {
+          alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+          clearCart();
+          window.location.href = "/track-order?success=true";
+        },
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone
+        },
+        theme: {
+          color: "#1a5f3a"
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Payment failed", error);
+      alert("Payment failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="pt-32 pb-20 bg-neutral-50 min-h-screen">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-      <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-4xl font-bold font-outfit mb-12">Checkout</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold">Shipping Information</h2>
-            <div className="space-y-4">
-              <input type="text" placeholder="Full Name" className="w-full p-4 rounded-2xl border-neutral-200 focus:ring-primary-500" />
-              <input type="email" placeholder="Email Address" className="w-full p-4 rounded-2xl border-neutral-200 focus:ring-primary-500" />
-              <input type="tel" placeholder="Phone Number" className="w-full p-4 rounded-2xl border-neutral-200 focus:ring-primary-500" />
-              <textarea placeholder="Complete Address" rows={4} className="w-full p-4 rounded-2xl border-neutral-200 focus:ring-primary-500"></textarea>
+    <div className="pt-32 pb-20 bg-neutral-50 min-h-screen font-inter">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          {/* Shipping Form */}
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-3xl font-bold font-outfit mb-2">Shipping Details</h2>
+              <p className="text-neutral-500">Where should we send your golden jars?</p>
             </div>
+            
+            <form onSubmit={handlePayment} className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-neutral-400">Full Name</label>
+                  <input required name="name" value={formData.name} onChange={handleInputChange} className="w-full p-4 bg-white border border-neutral-100 rounded-2xl focus:ring-2 focus:ring-brand-green outline-none" placeholder="John Doe" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-neutral-400">Email Address</label>
+                  <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full p-4 bg-white border border-neutral-100 rounded-2xl focus:ring-2 focus:ring-brand-green outline-none" placeholder="john@example.com" />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-neutral-400">Phone Number</label>
+                <input required type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full p-4 bg-white border border-neutral-100 rounded-2xl focus:ring-2 focus:ring-brand-green outline-none" placeholder="+91 98765 43210" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-neutral-400">Address</label>
+                <textarea required name="address" value={formData.address} onChange={handleInputChange} rows={3} className="w-full p-4 bg-white border border-neutral-100 rounded-2xl focus:ring-2 focus:ring-brand-green outline-none" placeholder="House no, Street name..."></textarea>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-neutral-400">City</label>
+                  <input required name="city" value={formData.city} onChange={handleInputChange} className="w-full p-4 bg-white border border-neutral-100 rounded-2xl focus:ring-2 focus:ring-brand-green outline-none" placeholder="Mumbai" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-neutral-400">Pincode</label>
+                  <input required name="pincode" value={formData.pincode} onChange={handleInputChange} className="w-full p-4 bg-white border border-neutral-100 rounded-2xl focus:ring-2 focus:ring-brand-green outline-none" placeholder="400001" />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="btn-primary w-full py-5 flex items-center justify-center space-x-3 text-lg"
+              >
+                {loading ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <CreditCard size={22} />
+                    <span>Pay ₹ {(cartTotal * 80).toFixed(2)}</span>
+                  </>
+                )}
+              </button>
+            </form>
           </div>
-          
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm h-fit">
-            <h2 className="text-xl font-bold mb-6">Payment Summary</h2>
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between">
-                <span className="text-neutral-500">Items (1)</span>
-                <span className="font-bold">$24.99</span>
+
+          {/* Cart and Trust */}
+          <div className="lg:pl-16 space-y-12">
+            <div className="bg-white p-8 rounded-[3rem] border border-neutral-100 shadow-sm">
+              <h3 className="text-xl font-bold mb-8">Your Order</h3>
+              <div className="space-y-6 mb-8 max-h-96 overflow-y-auto pr-4">
+                {cart.map((item) => (
+                  <div key={item.id} className="flex justify-between items-center">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-100 flex-shrink-0">
+                        <img src={item.image} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-neutral-900">{item.name}</p>
+                        <p className="text-xs text-neutral-400">Qty: {item.quantity}</p>
+                      </div>
+                    </div>
+                    <span className="font-bold text-neutral-900">₹ {(item.price * item.quantity * 80).toFixed(2)}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">Delivery</span>
-                <span className="text-green-600 font-bold">$0.00</span>
-              </div>
-              <div className="h-px bg-neutral-100 my-4"></div>
-              <div className="flex justify-between items-center bg-primary-50 p-4 rounded-2xl">
-                <span className="font-bold">Amt. Payable</span>
-                <span className="text-2xl font-bold text-primary-600">$24.99</span>
+              
+              <div className="pt-6 border-t border-neutral-100 space-y-4">
+                <div className="flex justify-between text-neutral-500">
+                  <span>Shipping</span>
+                  <span className="text-green-600 font-bold uppercase tracking-widest text-[10px]">Free Delivery</span>
+                </div>
+                <div className="flex justify-between text-xl font-bold text-neutral-900">
+                  <span>Total Payable</span>
+                  <span className="text-brand-green">₹ {(cartTotal * 80).toFixed(2)}</span>
+                </div>
               </div>
             </div>
-            <button 
-              onClick={handlePayment}
-              disabled={isProcessing}
-              className="btn-primary w-full shadow-primary-200 py-4 disabled:opacity-50"
-            >
-              {isProcessing ? "Processing..." : "Pay with Razorpay"}
-            </button>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="p-6 bg-white rounded-3xl border border-neutral-100 flex items-center space-x-4">
+                <div className="p-3 bg-brand-green/10 rounded-2xl text-brand-green">
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <p className="font-bold text-sm">Quality Guaranteed</p>
+                  <p className="text-xs text-neutral-500">100% Raw & Organic</p>
+                </div>
+              </div>
+              <div className="p-6 bg-white rounded-3xl border border-neutral-100 flex items-center space-x-4">
+                <div className="p-3 bg-brand-green/10 rounded-2xl text-brand-green">
+                  <Lock size={24} />
+                </div>
+                <div>
+                  <p className="font-bold text-sm">Secure Checkout</p>
+                  <p className="text-xs text-neutral-500">Encrypted Payments</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

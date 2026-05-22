@@ -31,7 +31,7 @@ export default function CartPage() {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-6">
-            {[{id: '1', name: 'Raw Wildflower Honey', price: 24.99, quantity: 1, image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=800&auto=format&fit=crop'}].map((item) => (
+            {cart.map((item) => (
               <div key={item.id} className="bg-white p-6 rounded-3xl border border-neutral-100 flex items-center gap-6 shadow-sm">
                 <div className="w-24 h-24 bg-neutral-100 rounded-2xl overflow-hidden shrink-0">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
@@ -39,17 +39,30 @@ export default function CartPage() {
                 <div className="flex-grow">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-bold text-neutral-900">{item.name}</h3>
-                    <button className="text-neutral-400 hover:text-red-500 transition-colors">
+                    <button 
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-neutral-400 hover:text-red-500 transition-colors"
+                    >
                       <Trash2 size={18} />
                     </button>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-4 bg-neutral-100 px-4 py-2 rounded-xl">
-                      <button className="text-neutral-500 hover:text-primary-600"><Minus size={16} /></button>
+                      <button 
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        className="text-neutral-500 hover:text-brand-green"
+                      >
+                        <Minus size={16} />
+                      </button>
                       <span className="font-bold text-neutral-900 w-4 text-center">{item.quantity}</span>
-                      <button className="text-neutral-500 hover:text-primary-600"><Plus size={16} /></button>
+                      <button 
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="text-neutral-500 hover:text-brand-green"
+                      >
+                        <Plus size={16} />
+                      </button>
                     </div>
-                    <span className="text-xl font-bold text-neutral-900">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="text-xl font-bold text-neutral-900">₹ {(item.price * item.quantity * 80).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -62,7 +75,7 @@ export default function CartPage() {
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-neutral-500">
                   <span>Subtotal</span>
-                  <span className="font-bold text-neutral-900">$24.99</span>
+                  <span className="font-bold text-neutral-900">₹ {(cartTotal * 80).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-500">
                   <span>Shipping</span>
@@ -71,7 +84,7 @@ export default function CartPage() {
                 <div className="h-px bg-neutral-100 my-4"></div>
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold">Total</span>
-                  <span className="text-2xl font-bold text-primary-600">$24.99</span>
+                  <span className="text-2xl font-bold text-brand-green">₹ {(cartTotal * 80).toFixed(2)}</span>
                 </div>
               </div>
               
