@@ -3,56 +3,58 @@ import React from "react";
 import Link from "next/link";
 import { Star, ShoppingCart, Heart } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import { useRouter } from "next/navigation";
 
 const PRODUCTS = [
   {
     id: 1,
-    name: "Wildflower Raw Honey",
-    price: 24.99,
-    discountPrice: 19.99,
-    rating: 4.8,
-    reviews: 124,
-    image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=800&auto=format&fit=crop",
-    category: "Organic",
+    name: "Pure Himalayan Raw Honey",
+    price: 32.00,
+    discountPrice: 28.00,
+    rating: 4.9,
+    reviews: 156,
+    image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=800&auto=format&fit=crop",
+    category: "Raw Honey",
     weight: "500g"
   },
   {
     id: 2,
-    name: "Manuka Honey UMF 15+",
+    name: "Wild Forest Oak Honey",
     price: 45.00,
-    discountPrice: 39.99,
-    rating: 4.9,
-    reviews: 89,
-    image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=800&auto=format&fit=crop",
-    category: "Premium",
+    discountPrice: 38.00,
+    rating: 4.8,
+    reviews: 92,
+    image: "https://images.unsplash.com/photo-1610450530750-f80e0413008c?q=80&w=800&auto=format&fit=crop",
+    category: "Forest Honey",
     weight: "250g"
   },
   {
     id: 3,
-    name: "Clover Blossom Honey",
-    price: 18.00,
-    discountPrice: 14.99,
-    rating: 4.7,
-    reviews: 56,
+    name: "Golden Comb Honey",
+    price: 24.00,
+    discountPrice: null,
+    rating: 5.0,
+    reviews: 43,
     image: "https://images.unsplash.com/photo-1471943038886-981f9b370607?q=80&w=800&auto=format&fit=crop",
-    category: "Classic",
-    weight: "500g"
+    category: "Comb Honey",
+    weight: "300g"
   },
   {
     id: 4,
-    name: "Forest Oak Honey",
-    price: 28.00,
-    discountPrice: null,
-    rating: 4.6,
-    reviews: 42,
-    image: "https://images.unsplash.com/photo-1610450530750-f80e0413008c?q=80&w=800&auto=format&fit=crop",
-    category: "Special",
-    weight: "400g"
+    name: "Pure Premium A2 Ghee",
+    price: 52.00,
+    discountPrice: 48.00,
+    rating: 4.9,
+    reviews: 210,
+    image: "https://images.unsplash.com/photo-1589927986089-35812388d1f4?q=80&w=800&auto=format&fit=crop",
+    category: "A2 Ghee",
+    weight: "1kg"
   }
 ];
 
-const FeaturedProducts = () => {
+const FeaturedProducts = ({ filter = "Shop All", searchQuery = "" }: { filter?: string, searchQuery?: string }) => {
   const { addToCart } = useCart();
+  const router = useRouter();
 
   const handleAddToCart = (product: any) => {
     addToCart({
@@ -65,29 +67,42 @@ const FeaturedProducts = () => {
     alert(`${product.name} added to cart!`);
   };
 
+  const handleBuyNow = (product: any) => {
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.discountPrice || product.price,
+      quantity: 1,
+      image: product.image
+    });
+    router.push("/checkout");
+  };
+
+  const filteredProducts = PRODUCTS.filter(p => {
+    const matchesFilter = filter === "Shop All" || p.category.toLowerCase().includes(filter.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
   return (
-    <section className="py-24 bg-neutral-50 w-full">
+    <section className="py-12 bg-neutral-50 w-full min-h-[400px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-end mb-12">
-          <div className="space-y-4">
-            <h2 className="text-4xl font-bold font-outfit">Our Best Sellers</h2>
-            <p className="text-neutral-500">Discover our most loved honey varieties, harvested with care.</p>
-          </div>
-          <Link href="/products" className="hidden sm:flex items-center space-x-2 text-brand-green font-bold border-b-2 border-brand-green pb-1">
-            <span>View All</span>
-          </Link>
+        <div className="text-sm font-bold text-neutral-400 mb-8 uppercase tracking-widest">
+          Showing {filteredProducts.length} of {filteredProducts.length} products
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8">
-          {PRODUCTS.map((product) => (
+          {filteredProducts.map((product) => (
             <div key={product.id} className="group flex flex-col h-full bg-white border border-neutral-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500">
-              <div className="relative aspect-[3/4] overflow-hidden">
+              <div 
+                className="relative aspect-[3/4] overflow-hidden cursor-pointer"
+                onClick={() => router.push(`/products/${product.id}`)}
+              >
                 <img 
                   src={product.image} 
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                {/* Secondary image hover effect mockup */}
                 <div className="absolute inset-0 bg-neutral-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 {product.discountPrice && (
@@ -121,12 +136,18 @@ const FeaturedProducts = () => {
                   )}
                 </div>
 
-                <div className="mt-auto">
+                <div className="mt-auto space-y-3">
                   <button 
                     onClick={() => handleAddToCart(product)}
                     className="w-full py-3 border-2 border-brand-green text-brand-green rounded-full text-xs font-bold uppercase tracking-widest hover:bg-brand-green hover:text-white transition-all shadow-sm active:scale-95"
                   >
                     Add to Cart
+                  </button>
+                  <button 
+                    onClick={() => handleBuyNow(product)}
+                    className="w-full py-3 bg-brand-green text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all shadow-lg active:scale-95"
+                  >
+                    Buy Now
                   </button>
                 </div>
               </div>

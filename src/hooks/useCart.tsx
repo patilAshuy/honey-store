@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type CartItem = {
   id: string;
@@ -9,13 +9,28 @@ export type CartItem = {
   image: string;
 };
 
-export const useCart = () => {
+type CartContextType = {
+  cart: CartItem[];
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
+  cartTotal: number;
+};
+
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
-      setCart(JSON.parse(savedCart));
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Failed to parse cart", e);
+      }
     }
   }, []);
 
@@ -54,5 +69,17 @@ export const useCart = () => {
 
   const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  return { cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal };
+  return (
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
 };

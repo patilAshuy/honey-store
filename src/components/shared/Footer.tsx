@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MessageSquare, Instagram, Facebook, Twitter } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -44,18 +44,18 @@ const Footer = () => {
 
           <div>
             <h3 className="text-lg font-bold mb-6">Contact Us</h3>
-            <ul className="space-y-4 text-neutral-400">
-              <li className="flex items-center space-x-3">
-                <Mail size={18} className="text-primary-500" />
-                <span>hello@honeypremium.com</span>
+            <ul className="space-y-4">
+              <li className="flex items-start space-x-3 text-neutral-400 group">
+                <Mail className="w-5 h-5 text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-sm">anant.kulkarnikk@gmail.com</span>
               </li>
-              <li className="flex items-center space-x-3">
-                <Phone size={18} className="text-primary-500" />
-                <span>+1 234 567 890</span>
+              <li className="flex items-start space-x-3 text-neutral-400 group">
+                <Phone className="w-5 h-5 text-brand-green group-hover:scale-110 transition-transform" />
+                <span className="text-sm">+91 9422242240</span>
               </li>
-              <li className="flex items-center space-x-3">
-                <MapPin size={18} className="text-primary-500" />
-                <span>123 Bee Garden, Nature City</span>
+              <li className="flex items-start space-x-3 text-neutral-400 group">
+                <MessageSquare className="w-5 h-5 text-brand-green group-hover:scale-110 transition-transform" />
+                <a href="https://wa.me/919422242240" className="text-sm hover:text-brand-green transition-colors">WhatsApp Support</a>
               </li>
             </ul>
           </div>
