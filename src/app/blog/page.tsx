@@ -1,83 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, Clock, User } from "lucide-react";
-
-const posts = [
-  {
-    id: "1",
-    slug: "health-benefits-of-raw-honey",
-    title: "The Incredible Health Benefits of Raw Honey",
-    excerpt:
-      "Discover why raw, unprocessed honey is considered a superfood and how it can boost your immunity, heal wounds, and improve digestion naturally.",
-    image: "/images/Believe Honey One A.jpg.jpeg",
-    date: "May 15, 2026",
-    author: "Dr. Anant Kulkarni",
-    category: "Health & Wellness",
-    readTime: "5 min read",
-  },
-  {
-    id: "2",
-    slug: "sustainable-beekeeping",
-    title: "Sustainable Beekeeping: Our Commitment to Nature",
-    excerpt:
-      "How we ensure our bees are happy and thriving while producing the finest honey — from hive management to ethical harvesting practices.",
-    image: "/images/Kulkarni Apiary.jpg.jpeg",
-    date: "May 10, 2026",
-    author: "Kulkarni Apiary",
-    category: "Our Story",
-    readTime: "4 min read",
-  },
-  {
-    id: "3",
-    slug: "jamun-honey-benefits",
-    title: "Jamun Honey: The Dark Gold for Blood Sugar Balance",
-    excerpt:
-      "Jamun honey is harvested during the brief Indian Blackberry flowering season. Learn why it's prized for its anti-diabetic properties and rich iron content.",
-    image: "/images/PI Jamun Honey 1.jpg.jpeg",
-    date: "May 05, 2026",
-    author: "Dr. Anant Kulkarni",
-    category: "Honey Varieties",
-    readTime: "6 min read",
-  },
-  {
-    id: "4",
-    slug: "sidr-honey-king-of-honey",
-    title: "Sidr Honey: Why It's Called the King of Honey",
-    excerpt:
-      "Harvested from ancient Sidr trees, this rare honey has been prized for centuries. Explore its unique flavour, medicinal properties, and why it commands a premium price.",
-    image: "/images/PI Apple Sidr Honey 1.jpg.jpeg",
-    date: "April 28, 2026",
-    author: "Dr. Anant Kulkarni",
-    category: "Honey Varieties",
-    readTime: "7 min read",
-  },
-  {
-    id: "5",
-    slug: "forest-honey-wild-goodness",
-    title: "Forest Honey: Wild Goodness from the Western Ghats",
-    excerpt:
-      "Collected by wild bees from the dense forests of the Western Ghats, forest honey captures the essence of hundreds of wildflowers. Here's what makes it special.",
-    image: "/images/PI Forest Honey 1.jpg.jpeg",
-    date: "April 20, 2026",
-    author: "Kulkarni Apiary",
-    category: "Honey Varieties",
-    readTime: "5 min read",
-  },
-  {
-    id: "6",
-    slug: "honey-in-your-daily-routine",
-    title: "5 Simple Ways to Add Honey to Your Daily Routine",
-    excerpt:
-      "From morning warm water with honey to skincare masks — here are five easy, science-backed ways to make raw honey a part of your everyday wellness ritual.",
-    image: "/images/Believe Honey One B.jpg.jpeg",
-    date: "April 12, 2026",
-    author: "Dr. Anant Kulkarni",
-    category: "Lifestyle",
-    readTime: "4 min read",
-  },
-];
-
-export { posts };
+import { posts } from "./blogData";
 
 export default function BlogPage() {
   return (
@@ -117,7 +41,7 @@ export default function BlogPage() {
               {posts[0].title}
             </h2>
             <p className="text-neutral-300 text-lg max-w-xl mb-6">{posts[0].excerpt}</p>
-            <div className="flex items-center gap-6 text-neutral-400 text-sm">
+            <div className="flex flex-wrap items-center gap-6 text-neutral-400 text-sm">
               <span className="flex items-center gap-1.5">
                 <User size={14} /> {posts[0].author}
               </span>
