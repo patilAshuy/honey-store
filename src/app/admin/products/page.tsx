@@ -313,9 +313,15 @@ export default function AdminProducts() {
                     </td>
                     <td className="px-6 py-5">
                       <div>
-                        <span className="font-bold text-neutral-900">₹{product.discount_price || product.price}</span>
+                        <span className="font-bold text-neutral-900">
+                          ₹{product.discount_price
+                            ? (product.discount_price < 100 ? Math.round(product.discount_price * 80) : product.discount_price)
+                            : (product.price < 100 ? Math.round(product.price * 80) : product.price)}
+                        </span>
                         {product.discount_price && (
-                          <span className="text-xs text-neutral-400 line-through ml-2">₹{product.price}</span>
+                          <span className="text-xs text-neutral-400 line-through ml-2">
+                            ₹{product.price < 100 ? Math.round(product.price * 80) : product.price}
+                          </span>
                         )}
                       </div>
                     </td>

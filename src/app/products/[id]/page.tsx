@@ -69,10 +69,17 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   }
 
   const images = getImages(product);
-  const displayPrice = product.discount_price || product.price;
-  const originalPrice = product.discount_price ? product.price : null;
-  const discountPct = originalPrice
-    ? Math.round((1 - displayPrice / originalPrice) * 100)
+
+  // Prices stored as INR; old rows may be USD decimals (< 100) — convert those
+  const toINR = (v: number | null | undefined) =>
+    v == null ? null : v < 100 ? Math.round(v * 80) : Math.round(v);
+
+  const regularPrice = toINR(product.price) ?? 0;
+  const salePrice    = toINR(product.discount_price);
+  const displayPrice = salePrice ?? regularPrice;
+  const originalPrice = salePrice ? regularPrice : null;
+  const discountPct = salePrice
+    ? Math.round((1 - salePrice / regularPrice) * 100)
     : null;
 
   const handleAddToCart = () => {
@@ -171,10 +178,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
             {/* Price */}
             <div className="flex items-baseline gap-4">
-              <span className="text-4xl font-bold text-neutral-900">₹{displayPrice}</span>
+              <span className="text-4xl font-bold text-neutral-900">
+                ₹{displayPrice.toLocaleString("en-IN")}
+              </span>
               {originalPrice && (
                 <>
-                  <span className="text-xl text-neutral-400 line-through">₹{originalPrice}</span>
+                  <span className="text-xl text-neutral-400 line-through">
+                    ₹{originalPrice.toLocaleString("en-IN")}
+                  </span>
                   <span className="px-2 py-0.5 bg-red-100 text-red-600 text-sm font-bold rounded-full">
                     -{discountPct}%
                   </span>
