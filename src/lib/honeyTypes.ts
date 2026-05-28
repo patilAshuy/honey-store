@@ -1,55 +1,122 @@
-// Single source of truth for honey types used across the app.
-// The `value` stored in DB (honey_type column) must match these exactly.
+// src/lib/honeyTypes.ts
+
+// ─────────────────────────────────────────────────────────────
+// Honey Types — Single Source of Truth
+// The `value` MUST match the DB honey_type column exactly
+// ─────────────────────────────────────────────────────────────
 
 export const HONEY_TYPES = [
-  { value: "Jamun",     label: "Jamun Honey",    icon: "🫐", image: "/images/PI Jamun Honey 1.jpg.jpeg" },
-  { value: "Sidr",      label: "Sidr Honey",     icon: "🌿", image: "/images/PI Apple Sidr Honey 1.jpg.jpeg" },
-  { value: "Forest",    label: "Forest Honey",   icon: "🌳", image: "/images/PI Forest Honey 1.jpg.jpeg" },
-  { value: "Mustard",   label: "Mustard Honey",  icon: "🌻", image: "/images/PI Mustard Honey 1.jpg.jpeg" },
-  { value: "Tulsi",     label: "Tulsi Honey",    icon: "🌱", image: "/images/PI Tulsi Honey 1.jpg.jpeg" },
-  { value: "Raw Honey", label: "Raw Honey",      icon: "🐝", image: "/images/Believe Honey One A.jpg.jpeg" },
-  { value: "Wild Honey",label: "Wild Honey",     icon: "🍃", image: "/images/Believe Honey One B.jpg.jpeg" },
-  { value: "Multifloral",label:"Multifloral",    icon: "🌸", image: "/images/Believe Honey One C.jpg.jpeg" },
+  {
+    value: "Jamun",
+    label: "Jamun Honey",
+    icon: "🫐",
+    image: "/images/PI Jamun Honey 1.jpg.jpeg",
+  },
+  {
+    value: "Sidr",
+    label: "Sidr Honey",
+    icon: "🌿",
+    image: "/images/PI Apple Sidr Honey 1.jpg.jpeg",
+  },
+  {
+    value: "Forest",
+    label: "Forest Honey",
+    icon: "🌳",
+    image: "/images/PI Forest Honey 1.jpg.jpeg",
+  },
+  {
+    value: "Mustard",
+    label: "Mustard Honey",
+    icon: "🌻",
+    image: "/images/PI Mustard Honey 1.jpg.jpeg",
+  },
+  {
+    value: "Tulsi",
+    label: "Tulsi Honey",
+    icon: "🌱",
+    image: "/images/PI Tulsi Honey 1.jpg.jpeg",
+  },
+  {
+    value: "Raw Honey",
+    label: "Raw Honey",
+    icon: "🐝",
+    image: "/images/Believe Honey One A.jpg.jpeg",
+  },
+  {
+    value: "Wild Honey",
+    label: "Wild Honey",
+    icon: "🍃",
+    image: "/images/Believe Honey One B.jpg.jpeg",
+  },
+  {
+    value: "Multifloral",
+    label: "Multifloral Honey",
+    icon: "🌸",
+    image: "/images/Believe Honey One C.jpg.jpeg",
+  },
 ] as const;
 
-// All local images grouped by type — used as fallback in product cards
+// ─────────────────────────────────────────────────────────────
+// Strong Type Support
+// ─────────────────────────────────────────────────────────────
+
+export type HoneyType = (typeof HONEY_TYPES)[number]["value"];
+
+// ─────────────────────────────────────────────────────────────
+// Local fallback images grouped by honey type
+// Used when DB image is missing
+// ─────────────────────────────────────────────────────────────
+
 export const LOCAL_IMAGES: Record<string, string[]> = {
-  jamun:    [
+  jamun: [
     "/images/PI Jamun Honey 1.jpg.jpeg",
     "/images/PI Jamun Honey 2.jpg.jpeg",
     "/images/PI Jamun Honey 3.jpg.jpeg",
   ],
-  sidr:     [
+
+  sidr: [
     "/images/PI Apple Sidr Honey 1.jpg.jpeg",
     "/images/PI Apple Sidr Honey 2.jpg.jpeg",
     "/images/PI Apple Sidr Honey 3.jpg.jpeg",
   ],
-  forest:   [
+
+  forest: [
     "/images/PI Forest Honey 1.jpg.jpeg",
     "/images/PI Forest Honey 2.jpg.jpeg",
     "/images/PI Forest Honey 3.jpg.jpeg",
   ],
-  mustard:  [
+
+  mustard: [
     "/images/PI Mustard Honey 1.jpg.jpeg",
     "/images/PI Mustard Honey 2.jpg.jpeg",
     "/images/PI Mustard Honey 3.jpg.jpeg",
   ],
-  tulsi:    [
+
+  tulsi: [
     "/images/PI Tulsi Honey 1.jpg.jpeg",
     "/images/PI Tulsi Honey 2.jpg.jpeg",
     "/images/PI Tulsi Honey 3.jpg.jpeg",
   ],
-  raw:      [
+
+  raw: [
     "/images/Believe Honey One A.jpg.jpeg",
     "/images/Believe Honey One D.jpg.jpeg",
     "/images/Believe Honey One E.jpg.jpeg",
   ],
-  wild:     [
+
+  wild: [
     "/images/Believe Honey One B.jpg.jpeg",
     "/images/Believe Honey One C.jpg.jpeg",
     "/images/Kulkarni Apiary.jpg.jpeg",
   ],
-  default:  [
+
+  multifloral: [
+    "/images/Believe Honey One C.jpg.jpeg",
+    "/images/Believe Honey One D.jpg.jpeg",
+    "/images/Believe Honey One E.jpg.jpeg",
+  ],
+
+  default: [
     "/images/Believe Honey One A.jpg.jpeg",
     "/images/Believe Honey One B.jpg.jpeg",
     "/images/Believe Honey One C.jpg.jpeg",
@@ -58,23 +125,133 @@ export const LOCAL_IMAGES: Record<string, string[]> = {
   ],
 };
 
-// Returns the best image for a product — stored image first, then type-based fallback
-export function getProductImage(product: any, idx = 0): string {
-  const stored = product.images?.[0];
-  if (stored && (stored.startsWith("http") || stored.startsWith("/"))) return stored;
+// ─────────────────────────────────────────────────────────────
+// Product Types
+// ─────────────────────────────────────────────────────────────
 
-  const type = (product.honey_type || product.category_id || "").toLowerCase().trim();
-
-  // Check each key — use startsWith so "raw honey" matches "raw"
-  for (const [key, imgs] of Object.entries(LOCAL_IMAGES)) {
-    if (key === "default") continue;
-    if (type.startsWith(key) || type.includes(key)) return imgs[idx % imgs.length];
-  }
-  return LOCAL_IMAGES.default[idx % LOCAL_IMAGES.default.length];
+export interface ProductImageData {
+  images?: string[] | null;
+  image_url?: string | null;
+  honey_type?: HoneyType | string | null;
+  category_id?: string | null;
 }
 
-// Format a number as Indian Rupees — prices are stored as plain INR integers
-export function formatPrice(value: number | null | undefined): string {
-  if (value == null) return "—";
-  return `₹${Math.round(value).toLocaleString("en-IN")}`;
+// ─────────────────────────────────────────────────────────────
+// Get best image for product
+// Priority:
+// 1. images[] from DB
+// 2. image_url from DB
+// 3. local fallback by honey type
+// 4. default image
+// ─────────────────────────────────────────────────────────────
+
+export function getProductImage(
+  product: ProductImageData,
+  idx = 0
+): string {
+  // 1. Supabase images array
+  const firstArrayImage = product.images?.[0];
+
+  if (
+    firstArrayImage &&
+    (firstArrayImage.startsWith("http") ||
+      firstArrayImage.startsWith("/"))
+  ) {
+    return firstArrayImage;
+  }
+
+  // 2. Legacy single image_url support
+  if (
+    product.image_url &&
+    (product.image_url.startsWith("http") ||
+      product.image_url.startsWith("/"))
+  ) {
+    return product.image_url;
+  }
+
+  // 3. Fallback by honey type
+  const type = (
+    product.honey_type ||
+    product.category_id ||
+    ""
+  )
+    .toLowerCase()
+    .trim();
+
+  for (const [key, imgs] of Object.entries(LOCAL_IMAGES)) {
+    if (key === "default") continue;
+
+    // "raw honey" should match "raw"
+    if (type === key || type.startsWith(key) || type.includes(key)) {
+      return imgs[idx % imgs.length];
+    }
+  }
+
+  // 4. Default fallback
+  return LOCAL_IMAGES.default[
+    idx % LOCAL_IMAGES.default.length
+  ];
+}
+
+// ─────────────────────────────────────────────────────────────
+// Get honey type metadata
+// Useful for badges, icons, labels
+// ─────────────────────────────────────────────────────────────
+
+export function getHoneyTypeMeta(type?: string | null) {
+  if (!type) return null;
+
+  return HONEY_TYPES.find(
+    (t) => t.value.toLowerCase() === type.toLowerCase()
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Get default image for honey type
+// Used in admin auto-fill
+// ─────────────────────────────────────────────────────────────
+
+export function defaultImageForType(type?: string | null): string {
+  if (!type) {
+    return LOCAL_IMAGES.default[0];
+  }
+
+  const normalized = type.toLowerCase().trim();
+
+  for (const [key, imgs] of Object.entries(LOCAL_IMAGES)) {
+    if (key === "default") continue;
+
+    if (
+      normalized === key ||
+      normalized.startsWith(key) ||
+      normalized.includes(key)
+    ) {
+      return imgs[0];
+    }
+  }
+
+  return LOCAL_IMAGES.default[0];
+}
+
+// ─────────────────────────────────────────────────────────────
+// Format INR price
+// ─────────────────────────────────────────────────────────────
+
+export function formatPrice(
+  value: number | string | null | undefined
+): string {
+  if (value == null || value === "") {
+    return "—";
+  }
+
+  const num =
+    typeof value === "string"
+      ? parseFloat(value)
+      : value;
+
+  if (Number.isNaN(num)) {
+    return "—";
+  }
+
+  return `₹${Math.round(num).toLocaleString("en-IN")}`;
 }
