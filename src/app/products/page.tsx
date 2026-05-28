@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import FeaturedProducts from "@/components/shop/FeaturedProducts";
 import { HONEY_TYPES } from "@/lib/honeyTypes";
+import { supabase } from "@/lib/supabase";
 
 // "Shop All" + every honey type from the shared list
 const categories = [
@@ -13,6 +14,30 @@ const categories = [
 export default function ProductsPage() {
   const [currentFilter, setCurrentFilter] = useState("Shop All");
   const [searchQuery, setSearchQuery]     = useState("");
+  const [counts, setCounts]               = useState<Record<string, number>>({});
+
+  // Fetch per-category product counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("honey_type, category_id")
+        .eq("status", "active");
+
+      if (!data) return;
+
+      const map: Record<string, number> = { "Shop All": data.length };
+
+      for (const row of data) {
+        const key = (row.honey_type || row.category_id || "").trim();
+        if (key) map[key] = (map[key] ?? 0) + 1;
+      }
+
+      setCounts(map);
+    };
+
+    fetchCounts();
+  }, []);
 
   return (
     <div className="pt-32 pb-20 bg-white min-h-screen font-inter">
@@ -20,32 +45,51 @@ export default function ProductsPage() {
 
         {/* Category bubbles */}
         <div className="flex overflow-x-auto pb-8 gap-4 no-scrollbar justify-start sm:justify-center">
-          {categories.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => setCurrentFilter(cat.value)}
-              className={`flex flex-col items-center space-y-2 min-w-[80px] group transition-all duration-200 ${
-                currentFilter === cat.value ? "scale-110" : "opacity-60 hover:opacity-80"
-              }`}
-            >
-              <div
-                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 flex items-center justify-center text-2xl sm:text-3xl transition-all shadow-sm ${
-                  currentFilter === cat.value
-                    ? "border-brand-green bg-brand-green/5 shadow-brand-green/20"
-                    : "border-neutral-200 group-hover:border-brand-green/30"
+          {categories.map((cat) => {
+            const count = counts[cat.value];
+            return (
+              <button
+                key={cat.value}
+                onClick={() => setCurrentFilter(cat.value)}
+                className={`flex flex-col items-center space-y-2 min-w-[80px] group transition-all duration-200 ${
+                  currentFilter === cat.value ? "scale-110" : "opacity-60 hover:opacity-80"
                 }`}
               >
-                {cat.icon}
-              </div>
-              <span
-                className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#1a5f3a] text-center leading-tight ${
-                  currentFilter === cat.value ? "opacity-100" : "opacity-70"
-                }`}
-              >
-                {cat.label}
-              </span>
-            </button>
-          ))}
+                <div className="relative">
+                  <div
+                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 flex items-center justify-center text-2xl sm:text-3xl transition-all shadow-sm ${
+                      currentFilter === cat.value
+                        ? "border-brand-green bg-brand-green/5 shadow-brand-green/20"
+                        : "border-neutral-200 group-hover:border-brand-green/30"
+                    }`}
+                  >
+                    {cat.icon}
+                  </div>
+
+                  {/* Product count badge */}
+                  {count !== undefined && count > 0 && (
+                    <span
+                      className={`absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-black flex items-center justify-center leading-none ${
+                        currentFilter === cat.value
+                          ? "bg-brand-green text-white"
+                          : "bg-neutral-200 text-neutral-600"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </div>
+
+                <span
+                  className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#1a5f3a] text-center leading-tight ${
+                    currentFilter === cat.value ? "opacity-100" : "opacity-70"
+                  }`}
+                >
+                  {cat.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Search */}
