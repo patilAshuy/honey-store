@@ -2,15 +2,12 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import FeaturedProducts from "@/components/shop/FeaturedProducts";
+import { HONEY_TYPES } from "@/lib/honeyTypes";
 
+// "Shop All" + every honey type from the shared list
 const categories = [
-  { name: "Shop All", icon: "🍯" },
-  { name: "Jamun",    icon: "🫐" },
-  { name: "Sidr",     icon: "🌿" },
-  { name: "Forest",   icon: "🌳" },
-  { name: "Mustard",  icon: "🌻" },
-  { name: "Tulsi",    icon: "🌱" },
-  { name: "Raw Honey",icon: "🐝" },
+  { value: "Shop All", label: "Shop All", icon: "🍯" },
+  ...HONEY_TYPES.map((t) => ({ value: t.value, label: t.label, icon: t.icon })),
 ];
 
 export default function ProductsPage() {
@@ -22,18 +19,18 @@ export default function ProductsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Category bubbles */}
-        <div className="flex overflow-x-auto pb-8 gap-6 no-scrollbar justify-start sm:justify-center">
+        <div className="flex overflow-x-auto pb-8 gap-4 no-scrollbar justify-start sm:justify-center">
           {categories.map((cat) => (
             <button
-              key={cat.name}
-              onClick={() => setCurrentFilter(cat.name)}
-              className={`flex flex-col items-center space-y-3 min-w-[90px] group transition-all ${
-                currentFilter === cat.name ? "scale-110" : "opacity-60"
+              key={cat.value}
+              onClick={() => setCurrentFilter(cat.value)}
+              className={`flex flex-col items-center space-y-2 min-w-[80px] group transition-all duration-200 ${
+                currentFilter === cat.value ? "scale-110" : "opacity-60 hover:opacity-80"
               }`}
             >
               <div
-                className={`w-20 h-20 rounded-full border-2 flex items-center justify-center text-3xl transition-all shadow-sm ${
-                  currentFilter === cat.name
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 flex items-center justify-center text-2xl sm:text-3xl transition-all shadow-sm ${
+                  currentFilter === cat.value
                     ? "border-brand-green bg-brand-green/5 shadow-brand-green/20"
                     : "border-neutral-200 group-hover:border-brand-green/30"
                 }`}
@@ -41,17 +38,17 @@ export default function ProductsPage() {
                 {cat.icon}
               </div>
               <span
-                className={`text-[10px] font-bold uppercase tracking-widest text-[#1a5f3a] ${
-                  currentFilter === cat.name ? "opacity-100" : "opacity-70"
+                className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#1a5f3a] text-center leading-tight ${
+                  currentFilter === cat.value ? "opacity-100" : "opacity-70"
                 }`}
               >
-                {cat.name}
+                {cat.label}
               </span>
             </button>
           ))}
         </div>
 
-        {/* Search bar only — filter drawer removed */}
+        {/* Search */}
         <div className="py-8 border-t border-neutral-100">
           <div className="relative w-full sm:w-96 mx-auto">
             <Search
@@ -65,11 +62,10 @@ export default function ProductsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-10 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-green transition-all font-medium text-sm"
             />
-            {/* Clear button */}
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 transition-colors text-lg leading-none"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 transition-colors text-xl leading-none"
               >
                 ×
               </button>

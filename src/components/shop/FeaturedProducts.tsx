@@ -5,100 +5,8 @@ import { Star } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { getProductImage, formatPrice } from "@/lib/honeyTypes";
 
-// ── Local image fallbacks keyed by honey type ──────────────────────────────
-const LOCAL_IMAGES: Record<string, string[]> = {
-  jamun:   [
-    "/images/PI Jamun Honey 1.jpg.jpeg",
-    "/images/PI Jamun Honey 2.jpg.jpeg",
-    "/images/PI Jamun Honey 3.jpg.jpeg",
-  ],
-  sidr:    [
-    "/images/PI Apple Sidr Honey 1.jpg.jpeg",
-    "/images/PI Apple Sidr Honey 2.jpg.jpeg",
-    "/images/PI Apple Sidr Honey 3.jpg.jpeg",
-  ],
-  forest:  [
-    "/images/PI Forest Honey 1.jpg.jpeg",
-    "/images/PI Forest Honey 2.jpg.jpeg",
-    "/images/PI Forest Honey 3.jpg.jpeg",
-  ],
-  mustard: [
-    "/images/PI Mustard Honey 1.jpg.jpeg",
-    "/images/PI Mustard Honey 2.jpg.jpeg",
-    "/images/PI Mustard Honey 3.jpg.jpeg",
-  ],
-  tulsi:   [
-    "/images/PI Tulsi Honey 1.jpg.jpeg",
-    "/images/PI Tulsi Honey 2.jpg.jpeg",
-    "/images/PI Tulsi Honey 3.jpg.jpeg",
-  ],
-  default: [
-    "/images/Believe Honey One A.jpg.jpeg",
-    "/images/Believe Honey One B.jpg.jpeg",
-    "/images/Believe Honey One C.jpg.jpeg",
-    "/images/Believe Honey One D.jpg.jpeg",
-    "/images/Believe Honey One E.jpg.jpeg",
-  ],
-};
-
-function getProductImage(product: any, idx = 0): string {
-  // Use stored image if it looks like a real path
-  const stored = product.images?.[0];
-  if (stored && (stored.startsWith("http") || stored.startsWith("/"))) return stored;
-
-  // Fall back to local images by honey_type
-  const type = (product.honey_type || product.category_id || "").toLowerCase();
-  for (const [key, imgs] of Object.entries(LOCAL_IMAGES)) {
-    if (type.includes(key)) return imgs[idx % imgs.length];
-  }
-  return LOCAL_IMAGES.default[idx % LOCAL_IMAGES.default.length];
-}
-
-// ── Price helpers ──────────────────────────────────────────────────────────
-// Prices are stored as plain INR numbers (e.g. 499, 899).
-// Old seeded rows may have been stored as USD decimals (e.g. 24.99).
-// Rule: if the value is < 100 we treat it as USD and convert; otherwise show as-is.
-function toINR(value: number | null | undefined): number | null {
-  if (value == null) return null;
-  // Looks like a USD price (e.g. 24.99) — multiply by 80
-  if (value < 100) return Math.round(value * 80);
-  // Already INR
-  return Math.round(value);
-}
-
-function formatINR(value: number): string {
-  return `₹${value.toLocaleString("en-IN")}`;
-}
-
-// ── Filter helper ──────────────────────────────────────────────────────────
-// Returns true when the product matches the selected category bubble.
-// Handles: "Shop All", exact match, and partial match against honey_type / category_id / name.
-function matchesCategory(product: any, filter: string): boolean {
-  if (filter === "Shop All") return true;
-
-  const filterLower = filter.toLowerCase().trim();
-
-  // Fields to check — normalise to lowercase strings
-  const fields = [
-    product.honey_type,
-    product.category_id,
-    product.category,
-    product.name,
-  ]
-    .filter(Boolean)
-    .map((f: string) => f.toLowerCase().trim());
-
-  // Exact match first (most reliable)
-  if (fields.some((f) => f === filterLower)) return true;
-
-  // Partial match — the filter word appears inside the field OR vice-versa
-  if (fields.some((f) => f.includes(filterLower) || filterLower.includes(f))) return true;
-
-  return false;
-}
-
-// ── Component ──────────────────────────────────────────────────────────────
 const FeaturedProducts = ({
   filter = "Shop All",
   searchQuery = "",
@@ -125,10 +33,17 @@ const FeaturedProducts = ({
     fetchProducts();
   }, []);
 
-  // ── Apply category filter + search ──────────────────────────────────────
+  // ── Filter: category bubble + search ──────────────────────────────────
   const filteredProducts = products.filter((p) => {
-    const catMatch = matchesCategory(p, filter);
+    // Category match — "Shop All" shows everything
+    // Compare filter value against honey_type stored in DB (exact, case-insensitive)
+    const catMatch =
+      filter === "Shop All" ||
+      (p.honey_type || p.category_id || "")
+        .toLowerCase()
+        .trim() === filter.toLowerCase().trim();
 
+    // Search match
     const q = searchQuery.trim().toLowerCase();
     const searchMatch =
       !q ||
@@ -140,11 +55,11 @@ const FeaturedProducts = ({
   });
 
   const handleAddToCart = (product: any) => {
-    const price = toINR(product.discount_price || product.price) ?? 0;
     addToCart({
       id: product.id.toString(),
       name: product.name,
-      price,
+      // Price is stored as plain INR — use as-is
+      price: Number(product.discount_price || product.price) || 0,
       quantity: 1,
       image: getProductImage(product),
     });
@@ -155,7 +70,7 @@ const FeaturedProducts = ({
     router.push("/checkout");
   };
 
-  // ── Loading skeleton ─────────────────────────────────────────────────────
+  // ── Skeleton ────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <section className="py-12 bg-neutral-50 w-full">
@@ -177,15 +92,14 @@ const FeaturedProducts = ({
     );
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────────────────────
   return (
     <section className="py-12 bg-neutral-50 w-full min-h-[400px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Result count */}
         <p className="text-sm font-bold text-neutral-400 mb-8 uppercase tracking-widest">
           {filteredProducts.length === products.length
-            ? `${products.length} products`
+            ? `${products.length} product${products.length !== 1 ? "s" : ""}`
             : `${filteredProducts.length} of ${products.length} products`}
         </p>
 
@@ -197,23 +111,15 @@ const FeaturedProducts = ({
                 ? "No products yet — add some from the admin panel."
                 : "No products match your search."}
             </p>
-            {(filter !== "Shop All" || searchQuery) && (
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-4 text-brand-green text-sm font-bold underline"
-              >
-                Clear filters
-              </button>
-            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8">
             {filteredProducts.map((product, idx) => {
               const imgSrc       = getProductImage(product, idx);
-              const salePrice    = toINR(product.discount_price);
-              const regularPrice = toINR(product.price) ?? 0;
+              const regularPrice = Number(product.price) || 0;
+              const salePrice    = product.discount_price ? Number(product.discount_price) : null;
               const displayPrice = salePrice ?? regularPrice;
-              const discountPct  = salePrice
+              const discountPct  = salePrice && regularPrice > 0
                 ? Math.round((1 - salePrice / regularPrice) * 100)
                 : null;
 
@@ -222,7 +128,7 @@ const FeaturedProducts = ({
                   key={product.id}
                   className="group flex flex-col h-full bg-white border border-neutral-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500"
                 >
-                  {/* ── Image ── */}
+                  {/* Image */}
                   <div
                     className="relative aspect-[3/4] overflow-hidden cursor-pointer"
                     onClick={() => router.push(`/products/${product.id}`)}
@@ -234,14 +140,11 @@ const FeaturedProducts = ({
                     />
                     <div className="absolute inset-0 bg-neutral-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                    {/* Discount badge */}
                     {discountPct && discountPct > 0 && (
                       <div className="absolute top-4 right-4 bg-brand-rust text-white px-3 py-1 text-[10px] font-black uppercase tracking-tighter rounded-sm">
                         -{discountPct}%
                       </div>
                     )}
-
-                    {/* Lab tested badge */}
                     {product.lab_report_url && (
                       <div className="absolute top-4 left-4 bg-brand-green text-white px-2 py-1 text-[9px] font-black uppercase tracking-tight rounded-sm flex items-center gap-1">
                         🧪 Lab Tested
@@ -249,7 +152,7 @@ const FeaturedProducts = ({
                     )}
                   </div>
 
-                  {/* ── Content ── */}
+                  {/* Content */}
                   <div className="p-6 flex flex-col flex-grow text-center">
                     <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] mb-2">
                       Love of Honey
@@ -259,7 +162,6 @@ const FeaturedProducts = ({
                       <Link href={`/products/${product.id}`}>{product.name}</Link>
                     </h3>
 
-                    {/* Stars */}
                     <div className="flex items-center justify-center space-x-1 text-brand-amber mb-4">
                       {[...Array(5)].map((_, i) => (
                         <Star key={i} size={14} fill="currentColor" />
@@ -267,25 +169,24 @@ const FeaturedProducts = ({
                       <span className="text-[11px] text-neutral-400 font-bold ml-1">(4.8)</span>
                     </div>
 
-                    {/* Price — always INR, no * 80 */}
+                    {/* Price — stored as INR, displayed as-is */}
                     <div className="mb-4">
                       {salePrice ? (
                         <div className="flex items-center justify-center gap-2">
                           <span className="text-sm text-neutral-400 line-through font-medium">
-                            {formatINR(regularPrice)}
+                            {formatPrice(regularPrice)}
                           </span>
                           <span className="text-lg font-black text-brand-rust tracking-tight">
-                            {formatINR(salePrice)}
+                            {formatPrice(salePrice)}
                           </span>
                         </div>
                       ) : (
                         <span className="text-lg font-black text-neutral-900">
-                          {formatINR(regularPrice)}
+                          {formatPrice(regularPrice)}
                         </span>
                       )}
                     </div>
 
-                    {/* Lab report link */}
                     {product.lab_report_url && (
                       <a
                         href={product.lab_report_url}
@@ -298,7 +199,6 @@ const FeaturedProducts = ({
                       </a>
                     )}
 
-                    {/* Buttons */}
                     <div className="mt-auto space-y-3">
                       <button
                         onClick={() => handleAddToCart(product)}

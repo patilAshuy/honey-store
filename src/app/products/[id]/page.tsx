@@ -6,8 +6,10 @@ import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-// Same local image fallback as FeaturedProducts
-const LOCAL_IMAGES: Record<string, string[]> = {
+import { getProductImage, formatPrice } from "@/lib/honeyTypes";
+
+// ── Local image fallbacks (same as honeyTypes.ts) ──────────────────────────
+const LOCAL_IMAGES_DETAIL: Record<string, string[]> = {
   jamun:   ["/images/PI Jamun Honey 1.jpg.jpeg", "/images/PI Jamun Honey 2.jpg.jpeg", "/images/PI Jamun Honey 3.jpg.jpeg"],
   sidr:    ["/images/PI Apple Sidr Honey 1.jpg.jpeg", "/images/PI Apple Sidr Honey 2.jpg.jpeg", "/images/PI Apple Sidr Honey 3.jpg.jpeg"],
   forest:  ["/images/PI Forest Honey 1.jpg.jpeg", "/images/PI Forest Honey 2.jpg.jpeg", "/images/PI Forest Honey 3.jpg.jpeg"],
@@ -23,10 +25,11 @@ function getImages(product: any): string[] {
   if (stored.length > 0) return stored;
 
   const type = (product.honey_type || product.category_id || "").toLowerCase();
-  for (const [key, imgs] of Object.entries(LOCAL_IMAGES)) {
-    if (type.includes(key)) return imgs;
+  for (const [key, imgs] of Object.entries(LOCAL_IMAGES_DETAIL)) {
+    if (key === "default") continue;
+    if (type.startsWith(key) || type.includes(key)) return imgs;
   }
-  return LOCAL_IMAGES.default;
+  return LOCAL_IMAGES_DETAIL.default;
 }
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
@@ -70,15 +73,12 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
   const images = getImages(product);
 
-  // Prices stored as INR; old rows may be USD decimals (< 100) — convert those
-  const toINR = (v: number | null | undefined) =>
-    v == null ? null : v < 100 ? Math.round(v * 80) : Math.round(v);
-
-  const regularPrice = toINR(product.price) ?? 0;
-  const salePrice    = toINR(product.discount_price);
+  // Prices are stored as plain INR — display as-is, no conversion
+  const regularPrice = Math.round(Number(product.price) || 0);
+  const salePrice    = product.discount_price ? Math.round(Number(product.discount_price)) : null;
   const displayPrice = salePrice ?? regularPrice;
   const originalPrice = salePrice ? regularPrice : null;
-  const discountPct = salePrice
+  const discountPct = salePrice && regularPrice > 0
     ? Math.round((1 - salePrice / regularPrice) * 100)
     : null;
 
@@ -179,12 +179,12 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             {/* Price */}
             <div className="flex items-baseline gap-4">
               <span className="text-4xl font-bold text-neutral-900">
-                ₹{displayPrice.toLocaleString("en-IN")}
+                {formatPrice(displayPrice)}
               </span>
               {originalPrice && (
                 <>
                   <span className="text-xl text-neutral-400 line-through">
-                    ₹{originalPrice.toLocaleString("en-IN")}
+                    {formatPrice(originalPrice)}
                   </span>
                   <span className="px-2 py-0.5 bg-red-100 text-red-600 text-sm font-bold rounded-full">
                     -{discountPct}%
