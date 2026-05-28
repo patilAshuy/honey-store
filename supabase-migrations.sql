@@ -14,6 +14,10 @@ ALTER TABLE public.products
 ALTER TABLE public.products
   ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
 
+-- Certifications: e.g. ARRAY['FSSAI', 'Organic India', 'AGMARK']
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS certifications TEXT[] DEFAULT '{}';
+
 -- ── STEP 2: Products RLS ─────────────────────────────────────
 -- Public can read active products; only authenticated admin can write.
 

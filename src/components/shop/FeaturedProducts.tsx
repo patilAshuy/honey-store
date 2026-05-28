@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Star, Award } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -33,17 +33,15 @@ const FeaturedProducts = ({
     fetchProducts();
   }, []);
 
-  // ── Filter: category bubble + search ──────────────────────────────────
+  // ── Filter ─────────────────────────────────────────────────────────────
   const filteredProducts = products.filter((p) => {
-    // Category match — "Shop All" shows everything
-    // Compare filter value against honey_type stored in DB (exact, case-insensitive)
+    // Exact case-insensitive match on honey_type
     const catMatch =
       filter === "Shop All" ||
       (p.honey_type || p.category_id || "")
         .toLowerCase()
         .trim() === filter.toLowerCase().trim();
 
-    // Search match
     const q = searchQuery.trim().toLowerCase();
     const searchMatch =
       !q ||
@@ -55,11 +53,12 @@ const FeaturedProducts = ({
   });
 
   const handleAddToCart = (product: any) => {
+    // Price stored as plain INR — use as-is, no * 80
+    const price = Number(product.discount_price || product.price) || 0;
     addToCart({
       id: product.id.toString(),
       name: product.name,
-      // Price is stored as plain INR — use as-is
-      price: Number(product.discount_price || product.price) || 0,
+      price,
       quantity: 1,
       image: getProductImage(product),
     });
@@ -97,8 +96,9 @@ const FeaturedProducts = ({
     <section className="py-12 bg-neutral-50 w-full min-h-[400px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
+        {/* Count — always shows total when Shop All, filtered count otherwise */}
         <p className="text-sm font-bold text-neutral-400 mb-8 uppercase tracking-widest">
-          {filteredProducts.length === products.length
+          {filter === "Shop All" && !searchQuery.trim()
             ? `${products.length} product${products.length !== 1 ? "s" : ""}`
             : `${filteredProducts.length} of ${products.length} products`}
         </p>
@@ -118,17 +118,21 @@ const FeaturedProducts = ({
               const imgSrc       = getProductImage(product, idx);
               const regularPrice = Number(product.price) || 0;
               const salePrice    = product.discount_price ? Number(product.discount_price) : null;
-              const displayPrice = salePrice ?? regularPrice;
               const discountPct  = salePrice && regularPrice > 0
                 ? Math.round((1 - salePrice / regularPrice) * 100)
                 : null;
+
+              // Certifications array from DB
+              const certs: string[] = Array.isArray(product.certifications)
+                ? product.certifications
+                : [];
 
               return (
                 <div
                   key={product.id}
                   className="group flex flex-col h-full bg-white border border-neutral-100 rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500"
                 >
-                  {/* Image */}
+                  {/* ── Image ── */}
                   <div
                     className="relative aspect-[3/4] overflow-hidden cursor-pointer"
                     onClick={() => router.push(`/products/${product.id}`)}
@@ -140,11 +144,14 @@ const FeaturedProducts = ({
                     />
                     <div className="absolute inset-0 bg-neutral-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
+                    {/* Discount badge */}
                     {discountPct && discountPct > 0 && (
                       <div className="absolute top-4 right-4 bg-brand-rust text-white px-3 py-1 text-[10px] font-black uppercase tracking-tighter rounded-sm">
                         -{discountPct}%
                       </div>
                     )}
+
+                    {/* Lab tested badge */}
                     {product.lab_report_url && (
                       <div className="absolute top-4 left-4 bg-brand-green text-white px-2 py-1 text-[9px] font-black uppercase tracking-tight rounded-sm flex items-center gap-1">
                         🧪 Lab Tested
@@ -152,7 +159,7 @@ const FeaturedProducts = ({
                     )}
                   </div>
 
-                  {/* Content */}
+                  {/* ── Content ── */}
                   <div className="p-6 flex flex-col flex-grow text-center">
                     <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.2em] mb-2">
                       Love of Honey
@@ -162,14 +169,30 @@ const FeaturedProducts = ({
                       <Link href={`/products/${product.id}`}>{product.name}</Link>
                     </h3>
 
-                    <div className="flex items-center justify-center space-x-1 text-brand-amber mb-4">
+                    {/* Stars */}
+                    <div className="flex items-center justify-center space-x-1 text-brand-amber mb-3">
                       {[...Array(5)].map((_, i) => (
                         <Star key={i} size={14} fill="currentColor" />
                       ))}
                       <span className="text-[11px] text-neutral-400 font-bold ml-1">(4.8)</span>
                     </div>
 
-                    {/* Price — stored as INR, displayed as-is */}
+                    {/* Certifications */}
+                    {certs.length > 0 && (
+                      <div className="flex flex-wrap justify-center gap-1 mb-3">
+                        {certs.map((cert) => (
+                          <span
+                            key={cert}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 text-[9px] font-bold uppercase tracking-wide rounded-full"
+                          >
+                            <Award size={9} />
+                            {cert}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Price — plain INR, no conversion */}
                     <div className="mb-4">
                       {salePrice ? (
                         <div className="flex items-center justify-center gap-2">
@@ -187,6 +210,7 @@ const FeaturedProducts = ({
                       )}
                     </div>
 
+                    {/* Lab report link */}
                     {product.lab_report_url && (
                       <a
                         href={product.lab_report_url}
@@ -199,6 +223,7 @@ const FeaturedProducts = ({
                       </a>
                     )}
 
+                    {/* Buttons */}
                     <div className="mt-auto space-y-3">
                       <button
                         onClick={() => handleAddToCart(product)}
