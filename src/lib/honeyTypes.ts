@@ -54,7 +54,7 @@ export const HONEY_TYPES = [
     icon: "🌸",
     image: "/images/Believe Honey One C.jpg.jpeg",
   },
-] as const;
+] satisfies { value: string; label: string; icon: string; image: string }[];
 
 // ─────────────────────────────────────────────────────────────
 // Strong Type Support

@@ -39,7 +39,19 @@ function defaultImageForType(honeyType: string): string {
   return LOCAL_IMAGES.default[0];
 }
 
-const emptyForm = {
+const emptyForm: {
+  name: string;
+  description: string;
+  price: string;
+  discount_price: string;
+  stock_quantity: string;
+  honey_type: string;
+  image_url: string;
+  weight: string;
+  is_featured: boolean;
+  status: "active" | "inactive";
+  lab_report_url: string;
+} = {
   name: "",
   description: "",
   price: "",
@@ -49,7 +61,7 @@ const emptyForm = {
   image_url: HONEY_TYPES[0].image,
   weight: "500g",
   is_featured: false,
-  status: "active" as "active" | "inactive",
+  status: "active",
   lab_report_url: "",
 };
 
