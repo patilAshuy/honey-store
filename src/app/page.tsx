@@ -13,7 +13,7 @@ export default function Home() {
           <div className="relative w-full h-full">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-200 rounded-full blur-3xl opacity-50 animate-pulse"></div>
             <img 
-              src="https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?q=80&w=1000&auto=format&fit=crop" 
+              src="/images/Believe Honey One A.jpg.jpeg" 
               alt="Honey Jar" 
               className="relative z-10 w-full h-full object-contain mix-blend-multiply animate-float"
             />

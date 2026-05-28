@@ -37,7 +37,7 @@ const Navbar = () => {
 
             {/* Center Logo */}
             <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
-              <div className="w-12 h-12 bg-brand-green rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg mb-1">LOI</div>
+              <div className="w-12 h-12 bg-brand-green rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg mb-1">LOH</div>
               <span className="font-outfit text-lg font-black tracking-tighter text-[#1a5f3a]">
                 LOVE OF <span className="text-brand-amber">HONEY</span>
               </span>

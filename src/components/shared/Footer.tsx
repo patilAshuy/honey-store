@@ -9,8 +9,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="space-y-6">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-xl">H</div>
-              <span className="font-outfit text-2xl font-bold">Honey<span className="text-primary-500">Premium</span></span>
+              <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-xl">LOH</div>
+              <span className="font-outfit text-2xl font-bold">Love of<span className="text-primary-500"> Honey</span></span>
             </Link>
             <p className="text-neutral-400 leading-relaxed">
               Bringing the purest essence of nature to your doorstep. Our honey is ethically sourced, raw, and full of natural goodness.
