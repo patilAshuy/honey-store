@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star, ShieldCheck, Truck, Leaf } from "lucide-react";
 import FeaturedProducts from "@/components/shop/FeaturedProducts";
+import NewsletterSection from "@/components/shared/NewsletterSection";
 
 export default function Home() {
   return (
@@ -87,28 +88,10 @@ export default function Home() {
 
       <FeaturedProducts />
 
-      {/* CTA Section */}
+      {/* CTA / Newsletter Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-primary-900 rounded-[3rem] p-12 lg:p-20 relative overflow-hidden text-center text-white">
-            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-primary-500/20 rounded-full blur-3xl"></div>
-            <div className="relative z-10 max-w-2xl mx-auto space-y-8">
-              <h2 className="text-4xl lg:text-6xl font-bold font-outfit">Join the Sweet Revolution</h2>
-              <p className="text-primary-100 text-lg opacity-80">
-                Subscribe to our newsletter and get 15% off your first order. Stay updated on our latest harvests and limited editions.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email" 
-                  className="w-full sm:w-80 px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
-                />
-                <button className="w-full sm:w-auto px-10 py-4 bg-white text-primary-900 rounded-full font-bold hover:bg-primary-50 transition-colors shadow-xl">
-                  Subscribe
-                </button>
-              </div>
-            </div>
-          </div>
+          <NewsletterSection />
         </div>
       </section>
     </div>

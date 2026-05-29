@@ -2,46 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Force light mode — remove dark mode override that caused white-on-white ── */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  color-scheme: light;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
+  color: #1a1a1a;
   background: #fcfbf9;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ── Reusable component classes ─────────────────────────────── */
 @layer components {
   .btn-primary {
-    @apply bg-brand-green text-white px-8 py-4 rounded-full font-bold hover:bg-[#154d2f] transition-all duration-300 shadow-sm hover:shadow-xl active:scale-95 uppercase tracking-wider text-sm;
+    @apply bg-brand-green text-white px-8 py-4 rounded-full font-bold
+           hover:bg-[#154d2f] transition-all duration-300 shadow-sm
+           hover:shadow-xl active:scale-95 uppercase tracking-wider text-sm
+           inline-flex items-center justify-center;
   }
-  
+
   .glass-card {
     @apply bg-white border border-neutral-100 shadow-sm rounded-3xl;
   }
-  
-  .honey-gradient {
-    @apply bg-gradient-to-r from-primary-500 to-primary-700;
+
+  .input-base {
+    @apply w-full p-4 bg-neutral-50 border border-neutral-200 rounded-2xl
+           focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white
+           transition-all font-medium text-neutral-800;
+  }
+
+  .label-xs {
+    @apply block text-xs font-bold uppercase tracking-widest text-neutral-400 mb-1;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase;
   }
 }
 
-/* Custom animations */
+/* ── Animations ─────────────────────────────────────────────── */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* ── No scrollbar utility ───────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Focus ring ─────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #1a5f3a;
+  outline-offset: 2px;
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
+/* ── Prose overrides for blog ───────────────────────────────── */
+.prose h3 { color: #1a1a1a; }
+.prose p   { color: #4b5563; }
+.prose li  { color: #4b5563; }

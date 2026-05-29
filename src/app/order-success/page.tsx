@@ -1,48 +1,85 @@
+"use client";
 import React from "react";
 import Link from "next/link";
-import { CheckCircle, Package, ArrowRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { CheckCircle, Package, ArrowRight, ShoppingBag } from "lucide-react";
 
 export default function OrderSuccessPage() {
-  return (
-    <div className="pt-40 pb-20 flex flex-col items-center justify-center space-y-8 px-4">
-      <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center animate-bounce">
-        <CheckCircle size={56} />
-      </div>
-      <div className="text-center space-y-4 max-w-lg">
-        <h1 className="text-4xl font-bold font-outfit">Order Confirmed!</h1>
-        <p className="text-neutral-500 text-lg">
-          Thank you for choosing HoneyPremium. Your order #HP-12345 has been placed successfully and is being prepared for harvest.
-        </p>
-      </div>
-      
-      <div className="bg-white p-8 rounded-[2.5rem] border border-neutral-100 shadow-sm w-full max-w-md space-y-6">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-primary-100 rounded-2xl flex items-center justify-center text-primary-600">
-            <Package size={24} />
-          </div>
-          <div>
-            <p className="text-sm text-neutral-400">Order ID</p>
-            <p className="font-bold">#ORD-1001-XYZ</p>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <p className="text-sm font-bold text-neutral-900">Estimated Delivery</p>
-          <p className="text-neutral-500">May 25, 2026 - May 28, 2026</p>
-        </div>
-        <hr className="border-neutral-100" />
-        <Link href="/track-order" className="text-primary-600 font-bold hover:underline flex items-center space-x-2">
-          <span>Track Order Status</span>
-          <ArrowRight size={14} />
-        </Link>
-      </div>
+  const searchParams = useSearchParams();
+  const orderId    = searchParams.get("id") || "";
+  const paymentId  = searchParams.get("payment_id") || "";
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Link href="/products" className="btn-primary">
-          Continue Shopping
-        </Link>
-        <Link href="/" className="px-8 py-3 rounded-full border-2 border-neutral-200 font-semibold hover:border-primary-500 hover:text-primary-600 transition-all text-center">
-          Back to Home
-        </Link>
+  return (
+    <div className="pt-32 pb-20 min-h-screen bg-neutral-50 flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-lg">
+        {/* Success card */}
+        <div className="bg-white rounded-[2.5rem] border border-neutral-100 shadow-sm p-10 text-center space-y-6">
+          {/* Icon */}
+          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle size={44} />
+          </div>
+
+          <div>
+            <h1 className="text-3xl font-bold font-outfit text-neutral-900 mb-2">
+              Order Confirmed! 🍯
+            </h1>
+            <p className="text-neutral-500">
+              Thank you for choosing Love of Honey. Your order has been placed and payment verified successfully.
+            </p>
+          </div>
+
+          {/* Order details */}
+          <div className="bg-neutral-50 rounded-2xl p-5 text-left space-y-3">
+            {orderId && (
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Order ID</span>
+                <span className="font-mono text-sm font-bold text-neutral-800 break-all text-right max-w-[60%]">
+                  {orderId.slice(0, 20)}...
+                </span>
+              </div>
+            )}
+            {paymentId && (
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Payment ID</span>
+                <span className="font-mono text-sm font-bold text-neutral-800">{paymentId}</span>
+              </div>
+            )}
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Est. Delivery</span>
+              <span className="text-sm font-bold text-neutral-800">3–5 Business Days</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Status</span>
+              <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full uppercase">
+                Paid ✓
+              </span>
+            </div>
+          </div>
+
+          {/* Info */}
+          <div className="text-sm text-neutral-500 space-y-1">
+            <p>📧 A confirmation has been sent to your email.</p>
+            <p>📞 Support: <a href="tel:+919422242240" className="text-brand-green font-bold">+91 9422242240</a></p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            {orderId && (
+              <Link
+                href={`/track-order?id=${orderId}`}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-brand-green text-white rounded-full font-bold text-sm hover:bg-opacity-90 transition-all"
+              >
+                <Package size={16} /> Track Order
+              </Link>
+            )}
+            <Link
+              href="/products"
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 border-2 border-neutral-200 text-neutral-700 rounded-full font-bold text-sm hover:border-brand-green hover:text-brand-green transition-all"
+            >
+              <ShoppingBag size={16} /> Continue Shopping
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
